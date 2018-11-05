@@ -108,7 +108,7 @@ int main(int argc, char * argv[]) {
     clrscr();
 
     if (lines.size() == 0) {
-        char * line  = char[MAX_LINE_BUFFER];
+        char * line = new char[MAX_LINE_BUFFER];
         lines.push_back(line);
     }
     read();
