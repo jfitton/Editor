@@ -1,0 +1,5 @@
+This file is just to keep track of pages with information that I intend to use to develop this program.
+
+http://ascii-table.com/ansi-escape-sequences.php 
+http://www.asciitable.com/
+
