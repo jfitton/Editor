@@ -98,7 +98,7 @@ void read(){
         if(ch == 127) {
             clrscr();
         }else {
-            write(1,&ch,1);
+//            write(1,&ch,1);
         }
     }
 }
