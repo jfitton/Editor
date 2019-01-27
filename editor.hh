@@ -8,15 +8,15 @@ void tty_at_exit(void);
 void tty_raw_mode(void);
 void clrscr();
 void closeProgram();
-void writeInput(char);
+bool writeInput(char);
 void escape();
 void changeMode(char);
 void execInput(char);
 void readInput();
-void cursorUp();
-void cursorDown();
-void cursorLeft();
-void cursorRight();
+bool cursorUp();
+bool cursorDown();
+bool cursorLeft();
+bool cursorRight();
 
 // currently unimplemented
 

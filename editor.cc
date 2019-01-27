@@ -51,14 +51,28 @@ void tty_raw_mode(void) {
     tcsetattr(0, TCSANOW, &tty_attr);
 }
 
+bool affirm(const char * prompt) {
+    printf("%s (Y/N)\n", prompt);
+    char c = 0;
+    while(c != EOF) {
+        read(0,&c,1);
+        if (c == 'n' || c == 'N')
+            return false;
+        else if (c == 'y' || c == 'Y')
+            return true;
+        else 
+            return affirm("Please respond with a valid response.");
+    }
+}
+
 void clrscr() {                                                     // clears the screen of text (need to shift up 1 line after to have cursor 
     printf("\e[1;1H\e[2J");
     fflush(0);
     currLine = 0;
 }
 
-void cursorUp(){
-    if (currLine <= 0) return;
+bool cursorUp(){
+    if (currLine <= 0) return false;
     char ch;
     ch = 27;
     write(1,&ch,1);
@@ -67,10 +81,11 @@ void cursorUp(){
     ch = 'A';
     write(1,&ch,1);
     currLine--;
+    return true;
 }
 
-void cursorDown(){
-    if (currLine >= lines.size()-1) return;
+bool cursorDown(){
+    if (currLine >= lines.size()-1) return false;
     char ch;
     ch = 27;
     write(1,&ch,1);
@@ -79,32 +94,40 @@ void cursorDown(){
     ch = 'B';
     write(1,&ch,1);
     currLine++;
+    return true;
 }
 
-void cursorRight(){
+bool cursorRight(){
     if (linePos < line_len[currLine]){
-    char ch;
-    ch = 27;
-    write(1,&ch,1);
-    ch = '[';
-    write(1,&ch,1);
-    ch = 'C';
-    write(1,&ch,1);
-    linePos++;
+        char ch;
+        ch = 27;
+        write(1,&ch,1);
+        ch = '[';
+        write(1,&ch,1);
+        ch = 'C';
+        write(1,&ch,1);
+        linePos++;
+        return true;
     }
+    return false;
 }
 
-void cursorLeft(){
+bool cursorLeft(){
     if(linePos > 0){
-    char ch;
-    ch = 27;
-    write(1,&ch,1);
-    ch = '[';
-    write(1,&ch,1);
-    ch = 'D';
-    write(1,&ch,1);
-    linePos--;
+        char ch;
+        ch = 27;
+        write(1,&ch,1);
+        ch = '[';
+        write(1,&ch,1);
+        ch = 'D';
+        write(1,&ch,1);
+        linePos--;
+        return true;
     }
+    return false;
+}
+
+bool saveFile(){
 }
 
 void closeProgram(){
@@ -115,7 +138,7 @@ void closeProgram(){
     exit(0);
 }
 
-void writeInput(char ch){
+bool writeInput(char ch){
     if (32 <= ch && ch <= 126){                                     // writes character typed to stdout if it is a printable character
         line_len[currLine]++;
         int tmpPos = line_len[currLine];
@@ -139,7 +162,9 @@ void writeInput(char ch){
             cursorLeft();
             tmpPos--;
         }
+        return true;
     }
+    return false;
 }
 
 void escape(){                                                      // executes escape sequences such as cursor movement
@@ -188,7 +213,7 @@ void execInput(char ch){
 
 
         if (sequence == 0){                                         // no escape sequence, sets mode to 0 (base mode)
-           changeMode('0');
+            changeMode('0');
         } else {                                                    // escape sequence detected, performs action based on sequence
             escape();
         }
@@ -248,22 +273,31 @@ void readFile(char * filename) {
     }
 }
 
+FILE * createNewFile(char * filename){
+    return fopen(filename, "a+");
+}
+
 int main(int argc, char * argv[]) {
+
+    tty_raw_mode();
+
     if (argc >= 2) {
         if (!fileExists(argv[1])){
+            clrscr();
             std::string filen = argv[1];
             std::string fileNotFound("File \'" + filen + "\' could not be found.\n");
             printf("%s", fileNotFound.c_str());
-            exit(1);
+            std::string fileCreation("Would you like to create file " + filen + "?");
+            if(affirm(fileCreation.c_str())) file = createNewFile(argv[1]);
+            else exit(0);
         }
         readFile(argv[1]);
     }
-    tty_raw_mode();
     clrscr();
     for (int i = 0; i < lines.size(); i++){
         printf("%s\n", lines[i]);
     }
-//    exit(0);
+    //    exit(0);
 
     if (lines.size() == 0) {
         char * line = new char[MAX_LINE_BUFFER];
