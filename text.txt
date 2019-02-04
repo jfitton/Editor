@@ -1,4 +1,4 @@
 hello
 line 2
-number 3 asdf
+number 3
 asdf

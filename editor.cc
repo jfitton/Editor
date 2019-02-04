@@ -296,6 +296,10 @@ int main(int argc, char * argv[]) {
     clrscr();
     for (int i = 0; i < lines.size(); i++){
         printf("%s\n", lines[i]);
+        currLine++;
+    }
+    while (currLine != 0) {
+        cursorUp();
     }
     //    exit(0);
 
