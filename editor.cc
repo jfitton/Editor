@@ -71,6 +71,12 @@ void clrscr() {                                                     // clears th
     currLine = 0;
 }
 
+void alignCursor() {
+    while (linePos > line_len[currLine]) {
+        cursorLeft();
+    }
+}
+
 bool cursorUp(){
     if (currLine <= 0) return false;
     char ch;
@@ -81,6 +87,7 @@ bool cursorUp(){
     ch = 'A';
     write(1,&ch,1);
     currLine--;
+    alignCursor();
     return true;
 }
 
@@ -94,6 +101,7 @@ bool cursorDown(){
     ch = 'B';
     write(1,&ch,1);
     currLine++;
+    alignCursor();
     return true;
 }
 
@@ -139,6 +147,15 @@ void closeProgram(){
 }
 
 bool writeInput(char ch){
+    if (ch == '\n') {
+        for (int i = lines.size()-1; i > currLine; i++){
+            strcpy(lines[i+1], lines[i]);
+            bzero(lines[i], line_len[i]);
+        }
+        for (int i = 0; i < lines.size(); i++){
+            printf("%s\n",lines[i]);
+        }
+    }
     if (32 <= ch && ch <= 126){                                     // writes character typed to stdout if it is a printable character
         line_len[currLine]++;
         int tmpPos = line_len[currLine];
@@ -221,7 +238,7 @@ void execInput(char ch){
 
     }
 
-    if (32 <= ch <= 126){                                          
+    if (32 <= ch <= 126 || ch == '\n'){                                          
         if (mode == 0) {                                            // if input is a printable character and the program is in base mode, changes mode accordingly (more features in future)
             changeMode(ch);
         } else if (mode == 1) {                                     // if input is a printable character and the program is in write/insert mode, writes the input to terminal and file
