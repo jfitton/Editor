@@ -146,15 +146,92 @@ void closeProgram(){
     exit(0);
 }
 
+void stepLeft(int times) {
+    char ch;
+    for (int i=0;i<times;i++){
+        ch = 27;
+        write(1,&ch,1);
+        ch = '[';
+        write(1,&ch,1);
+        ch = 'D';
+        write(1,&ch,1);
+    }
+}
+
+void stepDown(int times){
+    char ch;
+    for (int i=0;i<times;i++){
+        ch = 27;
+        write(1,&ch,1);
+        ch = '[';
+        write(1,&ch,1);
+        ch = 'B';
+        write(1,&ch,1);
+    }
+}
+
+void clearLine() {
+    stepLeft(linePos);
+    for(int i=0;i<line_len[currLine];i++){
+        printf(" ");
+    }
+    stepLeft(line_len[currLine]-linePos);
+}
+
+void shiftLines(){
+}
+
+void newLine(){
+    if(currLine == lines.size()-1){
+        char newLine[MAX_LINE_BUFFER];
+        bzero(newLine, MAX_LINE_BUFFER);
+        char * lineCopy = (char *)malloc(sizeof(char) * MAX_LINE_BUFFER);
+        strcpy(lineCopy, newLine);
+        lines.push_back(lineCopy);
+        line_len.push_back(0);
+        currLine++;
+        stepDown(1);
+    } else if(currLine == 0) {
+    }else {
+        if(linePos == 0) {
+            cursorUp();
+            char newLine[MAX_LINE_BUFFER];
+            bzero(newLine,MAX_LINE_BUFFER);
+            std::vector<char*>::iterator lineIter = lines.begin();
+            std::vector<int>::iterator lenIter = line_len.begin();
+            for (int i=0; i<=currLine;i++){
+                lineIter++;
+                lenIter++;
+            }
+            char * lineCopy = (char*)malloc(sizeof(char)*MAX_LINE_BUFFER);
+            lines.insert(lineIter,lineCopy);
+            line_len.insert(lenIter, 0);
+        }
+    }
+}
+
 bool writeInput(char ch){
     if (ch == '\n') {
-        for (int i = lines.size()-1; i > currLine; i++){
-            strcpy(lines[i+1], lines[i]);
-            bzero(lines[i], line_len[i]);
-        }
-        for (int i = 0; i < lines.size(); i++){
-            printf("%s\n",lines[i]);
-        }
+        newLine();
+        /*        lines.push_back(newLine);
+                  clearLine();
+                  for (int i = lines.size()-1; i > currLine; i--){
+                  lines[i] = strcpy(lines[i], lines[i-1]);
+                  line_len[i] = line_len[i-1];
+                  bzero(lines[i], MAX_LINE_BUFFER);
+                  }
+                  line_len[currLine] = 0;
+                  for (int i=currLine; i<lines.size();i++) {
+                  cursorDown();
+                  clearLine();
+                  stepLeft(line_len[i]);
+                  printf("%s",lines[i]);
+                  stepLeft(line_len[i]);
+                  }
+                  line_len[currLine] = 0;*/
+        /*        for (int i = 0; i < lines.size(); i++){
+                  printf("%s\n",lines[i]);
+                  }*/
     }
     if (32 <= ch && ch <= 126){                                     // writes character typed to stdout if it is a printable character
         line_len[currLine]++;
@@ -209,6 +286,11 @@ void escape(){                                                      // executes 
 void changeMode(char ch){
     if(ch == 'x'){
         closeProgram();                                             // special case for exitting program
+    }
+    if(ch=='p'){
+        for(int i=0; i<lines.size();i++){
+            printf("%s\n", lines[i]);
+        }
     }
     if (ch == 'i'){                                                 // changes to write/insert mode
         mode = 1;
