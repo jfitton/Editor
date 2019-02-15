@@ -173,12 +173,26 @@ void stepDown(int times){
 void clearLine() {
     stepLeft(linePos);
     for(int i=0;i<line_len[currLine];i++){
-        printf(" ");
+        char ch = ' ';
+        write(1,&ch,1);
     }
-    stepLeft(line_len[currLine]-linePos);
+    stepLeft(line_len[currLine]);
+    linePos = 0;
 }
 
 void shiftLines(){
+    int realLine = currLine;
+    clearLine();
+    cursorDown();
+    while (currLine<lines.size()-1){
+        clearLine();
+        printf("%s", lines[currLine]);
+        cursorDown();
+    }
+    stepLeft(line_len[currLine]);
+    while (currLine!=realLine){
+        cursorUp();
+    }
 }
 
 void newLine(){
@@ -191,6 +205,7 @@ void newLine(){
         line_len.push_back(0);
         currLine++;
         stepDown(1);
+        stepLeft(line_len[lines.size()-2]);
     } else if(currLine == 0) {
     }else {
         if(linePos == 0) {
@@ -206,6 +221,7 @@ void newLine(){
             char * lineCopy = (char*)malloc(sizeof(char)*MAX_LINE_BUFFER);
             lines.insert(lineIter,lineCopy);
             line_len.insert(lenIter, 0);
+            shiftLines();
         }
     }
 }

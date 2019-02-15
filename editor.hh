@@ -17,6 +17,12 @@ bool cursorUp();
 bool cursorDown();
 bool cursorLeft();
 bool cursorRight();
+void stepLeft(int);
+void stepDown(int);
+void clearLine();
+void shiftLines();
+void newLine();
+
 
 // currently unimplemented
 
