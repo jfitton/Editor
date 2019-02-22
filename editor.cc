@@ -146,81 +146,76 @@ void closeProgram(){
     exit(0);
 }
 
-void stepLeft(int times) {
-    char ch;
-    for (int i=0;i<times;i++){
-        ch = 27;
+void clearLine(int startPos) {
+    while(linePos > 0)
+        cursorLeft();
+    char ch = ' ';
+    for(int i = 0; i<line_len[currLine]; i++){
         write(1,&ch,1);
-        ch = '[';
-        write(1,&ch,1);
-        ch = 'D';
-        write(1,&ch,1);
+        linePos++;
     }
+    while(linePos!=startPos)
+        cursorLeft();
 }
 
-void stepDown(int times){
-    char ch;
-    for (int i=0;i<times;i++){
-        ch = 27;
-        write(1,&ch,1);
-        ch = '[';
-        write(1,&ch,1);
-        ch = 'B';
-        write(1,&ch,1);
-    }
+void clear(int startPos){
+    if(startPos==0)
+        clearLine(linePos);
 }
 
-void clearLine() {
-    stepLeft(linePos);
-    for(int i=0;i<line_len[currLine];i++){
-        char ch = ' ';
-        write(1,&ch,1);
+void clear(){
+    clearLine(linePos);
+}
+
+void shiftLines(int startPos){
+    int startLine = currLine;
+    if(startPos==0)
+        clear();
+    else{
+
     }
-    stepLeft(line_len[currLine]);
-    linePos = 0;
+    for(int i=currLine;i<lines.size();i++){
+        cursorDown();
+        clear(0);
+
+        for(int j=0;j<line_len[i];j++){
+            char ch = lines[i][j];
+            write(1,&ch,1);
+            linePos++;
+        }
+
+        for(int j=0;j<line_len[i];j++){
+            cursorLeft();
+        }
+
+    }
+    while(currLine!=startLine){
+        bzero(lines[currLine], MAX_LINE_BUFFER);
+        strcpy(lines[currLine], lines[currLine-1]);
+        line_len[currLine] = line_len[currLine-1];
+        cursorUp();
+    }
+    bzero(lines[currLine], MAX_LINE_BUFFER);
+    line_len[currLine] = 0;
 }
 
 void shiftLines(){
-    int realLine = currLine;
-    clearLine();
-    cursorDown();
-    while (currLine<lines.size()-1){
-        clearLine();
-        printf("%s", lines[currLine]);
-        cursorDown();
-    }
-    stepLeft(line_len[currLine]);
-    while (currLine!=realLine){
-        cursorUp();
-    }
+    shiftLines(0);
 }
 
 void newLine(){
     if(currLine == lines.size()-1){
-        char newLine[MAX_LINE_BUFFER];
-        bzero(newLine, MAX_LINE_BUFFER);
-        char * lineCopy = (char *)malloc(sizeof(char) * MAX_LINE_BUFFER);
-        strcpy(lineCopy, newLine);
-        lines.push_back(lineCopy);
-        line_len.push_back(0);
-        currLine++;
-        stepDown(1);
-        stepLeft(line_len[lines.size()-2]);
     } else if(currLine == 0) {
     }else {
         if(linePos == 0) {
-            cursorUp();
+            //            clearLine(linePos);
+
             char newLine[MAX_LINE_BUFFER];
-            bzero(newLine,MAX_LINE_BUFFER);
-            std::vector<char*>::iterator lineIter = lines.begin();
-            std::vector<int>::iterator lenIter = line_len.begin();
-            for (int i=0; i<=currLine;i++){
-                lineIter++;
-                lenIter++;
-            }
-            char * lineCopy = (char*)malloc(sizeof(char)*MAX_LINE_BUFFER);
-            lines.insert(lineIter,lineCopy);
-            line_len.insert(lenIter, 0);
+            bzero(newLine, MAX_LINE_BUFFER);
+            char * lineCopy = (char *)malloc(sizeof(char) * MAX_LINE_BUFFER);
+            strcpy(lineCopy, newLine);
+            lines.push_back(lineCopy);
+            line_len.push_back(0);
             shiftLines();
         }
     }
