@@ -232,6 +232,40 @@ void newLine(){
             lines.push_back(lineCopy);
             line_len.push_back(0);
             shiftLines();
+        } else {
+            int splitPoint = linePos;
+            char newLine[MAX_LINE_BUFFER];
+            bzero(newLine, MAX_LINE_BUFFER);
+            char * lineCopy = (char *)malloc(sizeof(char) * MAX_LINE_BUFFER);
+            strcpy(lineCopy, newLine);
+            lines.push_back(lineCopy);
+            line_len.push_back(0);
+            while(linePos > 0)
+                cursorLeft();
+            cursorDown();
+            shiftLines();
+            strcpy(lines[currLine], lines[currLine-1]+splitPoint);
+            line_len[currLine] = line_len[currLine-1]-splitPoint;
+
+            while(linePos < line_len[currLine]){
+                char ch = lines[currLine][linePos];
+                write(1,&ch,1);
+                linePos++;
+            }
+            cursorUp();
+            while(linePos > splitPoint)
+                cursorLeft();
+            while(linePos < line_len[currLine]){
+                char ch = ' ';
+                lines[currLine][linePos] = 0;
+                write(1,&ch,1);
+                linePos++;
+            }
+            line_len[currLine] = splitPoint;
+            while(linePos > 0)
+                cursorLeft();
+            cursorDown();
+
         }
     } else if(currLine == 0) {
         if(linePos == line_len[currLine]){
@@ -248,6 +282,39 @@ void newLine(){
             lines.push_back(lineCopy);
             line_len.push_back(0);
             shiftLines();
+        } else {
+            int splitPoint = linePos;
+            char newLine[MAX_LINE_BUFFER];
+            bzero(newLine, MAX_LINE_BUFFER);
+            char * lineCopy = (char *)malloc(sizeof(char) * MAX_LINE_BUFFER);
+            strcpy(lineCopy, newLine);
+            lines.push_back(lineCopy);
+            line_len.push_back(0);
+            while(linePos > 0)
+                cursorLeft();
+            cursorDown();
+            shiftLines();
+            strcpy(lines[currLine], lines[currLine-1]+splitPoint);
+            line_len[currLine] = line_len[currLine-1]-splitPoint;
+
+            while(linePos < line_len[currLine]){
+                char ch = lines[currLine][linePos];
+                write(1,&ch,1);
+                linePos++;
+            }
+            cursorUp();
+            while(linePos > splitPoint)
+                cursorLeft();
+            while(linePos < line_len[currLine]){
+                char ch = ' ';
+                lines[currLine][linePos] = 0;
+                write(1,&ch,1);
+                linePos++;
+            }
+            line_len[currLine] = splitPoint;
+            while(linePos > 0)
+                cursorLeft();
+            cursorDown();
         }
     }else {
         if(linePos == line_len[currLine]){
@@ -273,33 +340,46 @@ void newLine(){
             lines.push_back(lineCopy);
             line_len.push_back(0);
             shiftLines();
+        } else {
+            int splitPoint = linePos;
+            char newLine[MAX_LINE_BUFFER];
+            bzero(newLine, MAX_LINE_BUFFER);
+            char * lineCopy = (char *)malloc(sizeof(char) * MAX_LINE_BUFFER);
+            strcpy(lineCopy, newLine);
+            lines.push_back(lineCopy);
+            line_len.push_back(0);
+            while(linePos > 0)
+                cursorLeft();
+            cursorDown();
+            shiftLines();
+            strcpy(lines[currLine], lines[currLine-1]+splitPoint);
+            line_len[currLine] = line_len[currLine-1]-splitPoint;
+
+            while(linePos < line_len[currLine]){
+                char ch = lines[currLine][linePos];
+                write(1,&ch,1);
+                linePos++;
+            }
+            cursorUp();
+            while(linePos > splitPoint)
+                cursorLeft();
+            while(linePos < line_len[currLine]){
+                char ch = ' ';
+                lines[currLine][linePos] = 0;
+                write(1,&ch,1);
+                linePos++;
+            }
+            line_len[currLine] = splitPoint;
+            while(linePos > 0)
+                cursorLeft();
+            cursorDown();
         }
     }
 }
 
 bool writeInput(char ch){
-    if (ch == '\n') {
-        newLine();
-        /*        lines.push_back(newLine);
-                  clearLine();
-                  for (int i = lines.size()-1; i > currLine; i--){
-                  lines[i] = strcpy(lines[i], lines[i-1]);
-                  line_len[i] = line_len[i-1];
-                  bzero(lines[i], MAX_LINE_BUFFER);
-                  }
-                  line_len[currLine] = 0;
-                  for (int i=currLine; i<lines.size();i++) {
-                  cursorDown();
-                  clearLine();
-                  stepLeft(line_len[i]);
-                  printf("%s",lines[i]);
-                  stepLeft(line_len[i]);
-                  }
-                  line_len[currLine] = 0;*/
-        /*        for (int i = 0; i < lines.size(); i++){
-                  printf("%s\n",lines[i]);
-                  }*/
-    }
+    if (ch == '\n')
+        newLine(); 
     if (32 <= ch && ch <= 126){                                     // writes character typed to stdout if it is a printable character
         line_len[currLine]++;
         int tmpPos = line_len[currLine];
