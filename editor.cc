@@ -5,6 +5,7 @@
 #include <sys/select.h>
 #include <sys/types.h>
 #include <sys/time.h>
+#include <sys/ioctl.h>
 #include <strings.h>
 #include <string.h>
 #include <vector>
@@ -12,12 +13,13 @@
 
 #include "editor.hh"
 
-#define MAX_LINE_BUFFER 2048
+#define MAX_LINE_BUFFER 201
 
 using namespace std;
 
 struct termios original_tty;
 int mode = 1;                                                       // current input mode (0-base, 1-write)
+int terminalColumns = 0;
 
 std::vector<char *> lines;                                          // vector consisting of the lines of the text file
 std::vector<int> line_len;                                          // vector consisting of the lengths of the lengths of each of the lines of text
@@ -49,6 +51,12 @@ void tty_raw_mode(void) {
     tty_attr.c_cc[VMIN] = 1;
 
     tcsetattr(0, TCSANOW, &tty_attr);
+}
+
+int checkSize(){
+    struct winsize w;
+    ioctl(0, TIOCGWINSZ, &w);
+    return w.ws_col;
 }
 
 bool affirm(const char * prompt) {
@@ -390,7 +398,7 @@ void newLine(){
 bool writeInput(char ch){
     if (ch == '\n')
         newLine(); 
-    if (32 <= ch && ch <= 126){                                     // writes character typed to stdout if it is a printable character
+    if (32 <= ch && ch <= 126 && line_len[currLine] < MAX_LINE_BUFFER-1){                                     // writes character typed to stdout if it is a printable character
         line_len[currLine]++;
         int tmpPos = line_len[currLine];
         while (tmpPos != linePos) {
@@ -541,6 +549,9 @@ FILE * createNewFile(char * filename){
 int main(int argc, char * argv[]) {
 
     tty_raw_mode();
+
+    terminalColumns = checkSize();
+    
 
     if (argc >= 2) {
         if (!fileExists(argv[1])){
