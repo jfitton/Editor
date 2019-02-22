@@ -135,7 +135,15 @@ bool cursorLeft(){
     return false;
 }
 
-bool saveFile(){
+bool saveFile(char * filename){
+    file = fopen(filename,"w");
+    for(int i = 0;i<lines.size();i++){
+        if(line_len[i] >0)
+            fprintf(file, "%s\n", lines[i]);
+        else
+            fprintf(file,"\n");
+    }
+    fclose(file);
 }
 
 void closeProgram(){
@@ -205,9 +213,57 @@ void shiftLines(){
 
 void newLine(){
     if(currLine == lines.size()-1){
+        if(linePos == line_len[currLine]) {
+            char newLine[MAX_LINE_BUFFER];
+            bzero(newLine, MAX_LINE_BUFFER);
+            char * lineCopy = (char *)malloc(sizeof(char) * MAX_LINE_BUFFER);
+            strcpy(lineCopy, newLine);
+            lines.push_back(lineCopy);
+            line_len.push_back(0);
+            while(linePos > 0) {
+                cursorLeft();
+            }
+            cursorDown();
+        } else if(linePos == 0){
+            char newLine[MAX_LINE_BUFFER];
+            bzero(newLine, MAX_LINE_BUFFER);
+            char * lineCopy = (char *)malloc(sizeof(char) * MAX_LINE_BUFFER);
+            strcpy(lineCopy, newLine);
+            lines.push_back(lineCopy);
+            line_len.push_back(0);
+            shiftLines();
+        }
     } else if(currLine == 0) {
+        if(linePos == line_len[currLine]){
+            while(linePos > 0) {
+                cursorLeft();
+            }
+            cursorDown();
+            newLine();
+        } else if(linePos == 0) {
+            char newLine[MAX_LINE_BUFFER];
+            bzero(newLine, MAX_LINE_BUFFER);
+            char * lineCopy = (char *)malloc(sizeof(char) * MAX_LINE_BUFFER);
+            strcpy(lineCopy, newLine);
+            lines.push_back(lineCopy);
+            line_len.push_back(0);
+            shiftLines();
+        }
     }else {
-        if(linePos == 0) {
+        if(linePos == line_len[currLine]){
+            while(linePos > 0) {
+                cursorLeft();
+            }
+            cursorDown();
+            char newLine[MAX_LINE_BUFFER];
+            bzero(newLine, MAX_LINE_BUFFER);
+            char * lineCopy = (char *)malloc(sizeof(char) * MAX_LINE_BUFFER);
+            strcpy(lineCopy, newLine);
+            lines.push_back(lineCopy);
+            line_len.push_back(0);
+            shiftLines();
+//            newLine();
+        } else if(linePos == 0) {
             //            clearLine(linePos);
 
             char newLine[MAX_LINE_BUFFER];
@@ -297,16 +353,16 @@ void escape(){                                                      // executes 
 void changeMode(char ch){
     if(ch == 'x'){
         closeProgram();                                             // special case for exitting program
-    }
-    if(ch=='p'){
+    } else if(ch=='p'){
         for(int i=0; i<lines.size();i++){
             printf("%s\n", lines[i]);
         }
-    }
-    if (ch == 'i'){                                                 // changes to write/insert mode
+    } else if (ch == 'i'){                                                 // changes to write/insert mode
         mode = 1;
-    }else if(ch = '0'){
+    } else if(ch == '0'){
         mode = 0;                                                   // changes to base mode
+    } else if(ch == 's'){
+        saveFile(fileName);
     }
 }
 
@@ -401,6 +457,7 @@ int main(int argc, char * argv[]) {
             if(affirm(fileCreation.c_str())) file = createNewFile(argv[1]);
             else exit(0);
         }
+        fileName = argv[1];
         readFile(argv[1]);
     }
     clrscr();
