@@ -135,6 +135,16 @@ bool cursorLeft(){
     return false;
 }
 
+bool homeKey(){
+    while(linePos > 0)
+        cursorLeft();
+}
+
+bool endKey(){
+    while(linePos < line_len[currLine])
+        cursorRight();
+}
+
 bool saveFile(char * filename){
     file = fopen(filename,"w");
     for(int i = 0;i<lines.size();i++){
@@ -426,6 +436,11 @@ void escape(){                                                      // executes 
             case 'D':
                 cursorLeft();
                 break;
+            case 'F':
+                endKey();
+                break;
+            case 'H':
+                homeKey();
         }
     }
 }
